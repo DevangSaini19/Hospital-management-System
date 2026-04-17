@@ -1,153 +1,467 @@
-# Hospital Management System - Setup & Configuration Guide
+# 🔧 Complete Setup & Configuration Guide
 
-## 🔐 SECURITY WARNING: Remove Sensitive Data from GitHub
+Comprehensive guide for setting up the Hospital Management System with all configuration options, best practices, and troubleshooting.
 
-If you've already pushed the repository with the password hardcoded, follow these steps:
+---
 
-### Step 1: Remove Password History from Git
+## 📋 Table of Contents
+
+1. [System Requirements](#system-requirements)
+2. [Installation Steps](#installation-steps)
+3. [Database Setup](#database-setup)
+4. [Credential Configuration](#credential-configuration)
+5. [Compilation Options](#compilation-options)
+6. [Running the Application](#running-the-application)
+7. [Security Best Practices](#security-best-practices)
+8. [Troubleshooting](#troubleshooting)
+
+---
+
+## 🖥️ System Requirements
+
+### Minimum Requirements
+- **Java JDK:** 11.0.0 or higher
+- **MySQL Server:** 5.7.0 or higher
+- **RAM:** 2 GB minimum
+- **Disk Space:** 500 MB for project + libraries
+
+### Recommended
+- Java JDK 17 LTS or higher
+- MySQL 8.0 LTS
+- 4+ GB RAM
+- SSD (for faster database operations)
+
+### Verify Installations
 
 ```bash
-# Install BFG Repo-Cleaner (recommended)
-brew install bfg
+# Check Java version
+java -version
 
-# Or use git-filter-branch
-git filter-branch --tree-filter 'find . -name "DBConnection.java" -exec sed -i "" "s/private static final String PASSWORD = \"dev@2006\";/private static final String PASSWORD = \"\";/g" {} \;' HEAD
+# Check MySQL version
+mysql --version
+
+# Check MySQL service status (macOS)
+brew services list | grep mysql
 ```
 
-### Step 2: Force Push to GitHub (⚠️ Destructive - Use with Caution)
+---
+
+## 📥 Installation Steps
+
+### Step 1: Obtain the Project
+
+**Option A: Clone from GitHub**
+```bash
+git clone https://github.com/DevangSaini19/Hospital-management-System.git
+cd Hospital-management-System
+```
+
+**Option B: Download ZIP**
+1. Visit the GitHub repository
+2. Click "Code" → "Download ZIP"
+3. Extract to desired location
+4. Open terminal in extracted folder
+
+### Step 2: Verify Project Structure
 
 ```bash
-git push origin --force --all
-git push origin --force --tags
+# Check essential files exist
+ls -la src/Main.java
+ls -la database/hospital_db.sql
+ls -la lib/mysql-connector-j-9.6.0/
+
+# All should show file/directory exists
 ```
 
-### Step 3: Rotate Your MySQL Password
+---
+
+## 🗄️ Database Setup
+
+### Step 1: Start MySQL Service
+
+**macOS (Homebrew):**
+```bash
+# Start MySQL service
+brew services start mysql
+
+# Verify it's running
+brew services list | grep mysql
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo systemctl start mysql
+sudo systemctl status mysql
+```
+
+**Windows:**
+- Open Services (Press `Win + R`, type `services.msc`)
+- Find "MySQL" service
+- Right-click → Start
+
+### Step 2: Create Database
+
+**Method 1: Using SQL Script (Recommended)**
+```bash
+mysql -u root -p < database/hospital_db.sql
+```
+Enter your MySQL root password when prompted.
+
+**Method 2: Manual Setup**
+```bash
+# Connect to MySQL
+mysql -u root -p
+
+# Run these commands:
+CREATE DATABASE hospital_db;
+USE hospital_db;
+SOURCE database/hospital_db.sql;
+```
+
+**Method 3: Using MySQL Workbench**
+1. Open MySQL Workbench
+2. Connect to your MySQL server
+3. File → Open SQL Script → Select `hospital_db.sql`
+4. Execute (Ctrl+Enter)
+
+### Step 3: Verify Database Creation
+
+```bash
+# Connect to MySQL
+mysql -u root -p
+
+# Run verification
+SHOW DATABASES;  -- Should see "hospital_db"
+USE hospital_db;
+SHOW TABLES;     -- Should see "doctors", "patients", "appointments"
+SELECT COUNT(*) FROM doctors;  -- Should show 2+
+```
+
+---
+
+## 🔐 Credential Configuration
+
+### ⚠️ SECURITY FIRST: Never Hardcode Passwords!
+
+The application supports secure credential methods:
+
+---
+
+### Method 1: Environment Variables (PRODUCTION RECOMMENDED)
+
+**Why:** Safest option, no files to protect.
+
+**macOS/Linux - Temporary (Current Session):**
+```bash
+export DB_URL="jdbc:mysql://localhost:3306/hospital_db"
+export DB_USER="root"
+export DB_PASSWORD="YOUR_DB_PASSWORD"
+
+# Verify
+echo $DB_URL
+echo $DB_USER
+```
+
+**macOS/Linux - Permanent (Add to ~/.zshrc or ~/.bash_profile):**
+```bash
+# Add these lines to end of file
+export DB_URL="jdbc:mysql://localhost:3306/hospital_db"
+export DB_USER="root"
+export DB_PASSWORD="YOUR_DB_PASSWORD"
+
+# Apply changes
+source ~/.zshrc  # or source ~/.bash_profile
+```
+
+**Windows PowerShell:**
+```powershell
+# Current session only
+$env:DB_URL = "jdbc:mysql://localhost:3306/hospital_db"
+$env:DB_USER = "root"
+$env:DB_PASSWORD = "YOUR_DB_PASSWORD"
+```
+
+---
+
+### Method 2: Configuration File (DEVELOPMENT)
+
+**File Location:** `src/config/db.properties`
+
+**Create/Edit File:**
+```properties
+# Hospital Management System Database Configuration
+# ⚠️ WARNING: This file contains sensitive information
+# DO NOT commit to Git - already in .gitignore
+
+# Database Connection URL
+db.url=jdbc:mysql://localhost:3306/hospital_db
+
+# Database User
+db.user=root
+
+# Database Password
+db.password=YOUR_DB_PASSWORD
+```
+
+**Why it's secure:**
+- Already added to `.gitignore` (won't be pushed to GitHub)
+- Different for each developer/environment
+
+**Verify it's ignored:**
+```bash
+git status
+# Output should NOT show "db.properties"
+
+git check-ignore src/config/db.properties
+# Output: "src/config/db.properties"
+```
+
+---
+
+### Password Security Tips
+
+✅ **Strong Password Requirements:**
+- Minimum 12 characters
+- Mix of uppercase, lowercase, numbers, symbols
+- Avoid common words or patterns
+- Never reuse passwords
+
+**Example strong password:**
+```
+Hsp@tl2024!Secure#Pwd
+```
+
+---
+
+## 🔨 Compilation Options
+
+### Option 1: Simple Compilation (Recommended)
+
+```bash
+cd "your-project-folder"
+javac -cp "lib/mysql-connector-j-9.6.0/*:src" \
+  src/models/*.java \
+  src/db/*.java \
+  src/dao/*.java \
+  src/utils/*.java \
+  src/ui/*.java \
+  src/Main.java \
+  -d bin/
+```
+
+### Option 2: With Debug Information
+
+```bash
+javac -g -cp "lib/mysql-connector-j-9.6.0/*:src" \
+  src/models/*.java src/db/*.java src/dao/*.java \
+  src/utils/*.java src/ui/*.java src/Main.java -d bin/
+```
+
+### Option 3: Create Build Script
+
+**File: `build.sh` (macOS/Linux)**
+```bash
+#!/bin/bash
+
+echo "🔨 Compiling Hospital Management System..."
+
+javac -cp "lib/mysql-connector-j-9.6.0/*:src" \
+  src/models/*.java \
+  src/db/*.java \
+  src/dao/*.java \
+  src/utils/*.java \
+  src/ui/*.java \
+  src/Main.java \
+  -d bin/
+
+if [ $? -eq 0 ]; then
+  echo "✅ Compilation successful!"
+else
+  echo "❌ Compilation failed!"
+  exit 1
+fi
+```
+
+**Usage:**
+```bash
+chmod +x build.sh
+./build.sh
+```
+
+---
+
+## 🚀 Running the Application
+
+### Method 1: Command Line (Simplest)
+
+```bash
+java -cp "lib/mysql-connector-j-9.6.0/*:bin" Main
+```
+
+**Create Alias for Easy Access:**
+
+Add to `~/.zshrc` or `~/.bash_profile`:
+```bash
+alias hms="cd ~/Desktop/Hospital\ Management && \
+  java -cp lib/mysql-connector-j-9.6.0/*:bin Main"
+```
+
+Then simply run: `hms`
+
+### Method 2: Run Script
+
+**File: `run.sh` (macOS/Linux)**
+```bash
+#!/bin/bash
+
+echo "🏥 Starting Hospital Management System..."
+
+cd "your-project-folder"
+
+# Check if database credentials are set
+if [ -z "$DB_URL" ] && [ ! -f "src/config/db.properties" ]; then
+  echo "❌ Error: Database credentials not configured"
+  echo "Set environment variables or create src/config/db.properties"
+  exit 1
+fi
+
+java -cp "lib/mysql-connector-j-9.6.0/*:bin" Main
+```
+
+**Usage:**
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+### Method 3: From VS Code
+
+**Install Extension:**
+1. Open VS Code
+2. Go to Extensions (Ctrl+Shift+X)
+3. Search "Extension Pack for Java"
+4. Install by Microsoft
+
+**Run:**
+- Open `src/Main.java`
+- Click the ▶️ **Run** button
+
+### Method 4: From IDE
+
+**IntelliJ IDEA:**
+1. Right-click `src/Main.java`
+2. Select "Run 'Main'"
+
+**Eclipse:**
+1. Right-click `src/Main.java`
+2. Select "Run As" → "Java Application"
+
+---
+
+## 🔒 Security Best Practices
+
+### Git Security
+
+**1. Verify .gitignore Protects Secrets**
+
+```bash
+# Check .gitignore contents
+cat .gitignore | grep -i "properties\|env\|password"
+
+# Verify sensitive files won't be committed
+git check-ignore src/config/db.properties
+```
+
+**2. Pre-commit Hook (Optional)**
+
+Create `.git/hooks/pre-commit`:
+```bash
+#!/bin/bash
+
+# Prevent committing files with "password" in content
+if git diff --cached | grep -i "password.*=" | grep -v "YOUR_DB_PASSWORD"; then
+  echo "❌ ERROR: Credentials detected in staged changes!"
+  exit 1
+fi
+```
+
+Make it executable:
+```bash
+chmod +x .git/hooks/pre-commit
+```
+
+### Code Security
+
+✅ **Implemented:**
+- All SQL queries use PreparedStatement (prevents SQL injection)
+- Input validation for all user entries
+- Secure password handling
+
+✅ **Recommended:**
+- Implement user authentication layer
+- Add audit logging
+- Regular security updates
+
+### Database Security
 
 ```sql
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_secure_password';
+-- Create restricted database user (not root)
+CREATE USER 'hms_app'@'localhost' IDENTIFIED BY 'YOUR_STRONG_PASSWORD';
+GRANT SELECT, INSERT, UPDATE, DELETE ON hospital_db.* TO 'hms_app'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
 ---
 
-## 📋 Project Structure
+## 🐛 Troubleshooting
 
-```
-Hospital Management/
-├── src/
-│   ├── db/
-│   │   └── DBConnection.java          (Secure connection manager)
-│   ├── dao/
-│   │   ├── PatientDAO.java             (Patient database operations)
-│   │   └── AppointmentDAO.java         (Appointment database operations)
-│   ├── models/
-│   │   ├── Patient.java
-│   │   └── Appointment.java
-│   ├── ui/
-│   │   ├── AddPatientFormWithEvents.java
-│   │   ├── AppointmentFormWithEvents.java
-│   │   └── MainDashboard.java
-│   ├── utils/
-│   │   └── ValidationUtil.java         (Input validation)
-│   └── config/
-│       └── db.properties               (Database configuration)
-├── database/
-│   └── hospital_db.sql                 (Database schema)
-└── lib/
-    └── mysql-connector-j-9.6.0/
-```
+### Database Connection Issues
 
----
-
-## 🔧 Configuration
-
-### Option 1: Using Environment Variables (RECOMMENDED for Production)
-
-Set environment variables in your system:
-
-**macOS/Linux:**
+**Error: "Connection refused"**
 ```bash
-export DB_URL="jdbc:mysql://localhost:3306/hospital_db"
-export DB_USER="root"
-export DB_PASSWORD="your_secure_password"
+# Check if MySQL is running
+brew services list | grep mysql
+
+# Start MySQL
+brew services start mysql
 ```
 
-**Windows (PowerShell):**
-```powershell
-$env:DB_URL = "jdbc:mysql://localhost:3306/hospital_db"
-$env:DB_USER = "root"
-$env:DB_PASSWORD = "your_secure_password"
-```
-
-### Option 2: Using db.properties File (For Development)
-
-Create/Update `src/config/db.properties`:
-
-```properties
-# Database Configuration
-db.url=jdbc:mysql://localhost:3306/hospital_db
-db.user=root
-db.password=your_secure_password
-```
-
-⚠️ **IMPORTANT:** Add `db.properties` to `.gitignore` to prevent committing passwords:
-
+**Error: "Unknown database 'hospital_db'"**
 ```bash
-echo "src/config/db.properties" >> .gitignore
-git add .gitignore
-git commit -m "Add db.properties to gitignore"
-```
-
----
-
-## 📊 Database Setup
-
-### 1. Create Database and Tables
-
-```bash
+# Recreate database
 mysql -u root -p < database/hospital_db.sql
+
+# Verify
+mysql -u root -p -e "SHOW DATABASES;" | grep hospital_db
 ```
 
-### 2. Insert Sample Doctors
+### Compilation Issues
 
-```sql
-INSERT INTO doctors (name, specialization, phone, email) VALUES
-('Dr. Ramesh Sharma', 'Cardiology', '9876500001', 'ramesh@hospital.com'),
-('Dr. Priya Gupta', 'Neurology', '9876500002', 'priya@hospital.com'),
-('Dr. Amit Patel', 'Orthopaedics', '9876500003', 'amit@hospital.com');
+**Error: "ClassNotFoundException: com.mysql.cj.jdbc.Driver"**
+```bash
+# Verify JDBC driver location
+ls lib/mysql-connector-j-9.6.0/
+
+# Ensure lib is in classpath (-cp argument)
 ```
 
 ---
 
-## 🎯 Key Features Implemented
+## ✅ Verification Checklist
 
-### 1. **Add Patient Module**
-- ✅ Insert new patient with all fields
-- ✅ Validate phone number uniqueness
-- ✅ Input validation (age, phone, email, name format)
-- ✅ Auto-generated patient ID
-- ✅ Exception handling with specific error messages
+After setup, verify:
 
-**Usage:**
-```java
-PatientDAO dao = new PatientDAO();
-Patient patient = new Patient("John", "Doe", 30, "Male", "O+", 
-                               "9876543210", "john@email.com", 
-                               "Address 123", "No medical history");
-boolean success = dao.addPatient(patient); // Returns true if successful
-```
+- [ ] Java installed: `java -version` shows 11+
+- [ ] MySQL running: `brew services list` shows active
+- [ ] Database created: `mysql -u root -p -e "SHOW DATABASES;"` shows hospital_db
+- [ ] Source files present: `ls src/` shows all .java files
+- [ ] Project compiles: No errors from javac command
+- [ ] Application runs: GUI window appears
 
-### 2. **Appointment Module**
-- ✅ Book appointment with validation
-- ✅ Prevent duplicate appointments (same doctor, same time)
-- ✅ Validate patient and doctor existence
-- ✅ Generate unique token number
-- ✅ Support appointment status updates
+---
 
-**Usage:**
-```java
-AppointmentDAO dao = new AppointmentDAO();
-Appointment appt = new Appointment(1, 2, Date.valueOf("2024-05-20"), 
+**Last Updated:** April 2026  
+**Version:** 1.0
                                    Time.valueOf("09:00:00"), 
                                    "Cardiology", "Regular checkup");
 boolean success = dao.bookAppointment(appt); // Returns true if booked

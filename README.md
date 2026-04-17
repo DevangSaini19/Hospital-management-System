@@ -1,11 +1,37 @@
-# Hospital Management System (HMS)
-## Inspired by Bombay Hospital, Jaipur
+# 🏥 Hospital Management System (HMS)
 
-A comprehensive Java-based Hospital Management System with MySQL backend and Java Swing GUI.
+A comprehensive Java-based Hospital Management System featuring a user-friendly GUI, MySQL database integration, and complete patient and appointment management functionality.
 
 ---
 
-## 📋 PROJECT STRUCTURE
+## 📋 Project Overview
+
+**Hospital Management System** is a desktop application built with Java Swing that enables hospitals to manage:
+- Patien-Management-System/
+├── src/
+│   ├── Main.java                      # Application entry point
+│   ├── db/
+│   │   └── DBConnection.java          # MySQL connection management
+│   ├── models/
+│   │   ├── Patient.java               # Patient data model
+│   │   └── Appointment.java           # Appointment data model
+│   ├── dao/
+│   │   ├── PatientDAO.java            # Patient database operations
+│   │   └── AppointmentDAO.java        # Appointment database operations
+│   ├── utils/
+│   │   └── ValidationUtil.java        # Input validation utilities
+│   └── ui/
+│       ├── MainDashboard.java         # Main application window
+│       ├── AddPatientForm.java        # Patient registration form
+│       └── AppointmentForm.java       # Appointment booking form
+├── database/
+│   └── hospital_db.sql                # Database schema
+├── lib/
+│   └── mysql-connector-j-9.6.0/       # MySQL JDBC driver
+├── bin/                               # Compiled Java classes
+├── .gitignore                         # Git ignore configuration
+└── README.md                          # This file
+## 📁 Project Structure
 
 ```
 Hospital Management/
@@ -32,132 +58,247 @@ Hospital Management/
     └── settings.json             (VS Code Java configuration)
 ```
 
----
+---echnology Stack
 
-## 🛠️ TECH STACK
-
-- **Frontend:** Java Swing (javax.swing)
-- **Backend/Logic:** Core Java + Advanced Java (JDBC)
-- **Database:** MySQL
-- **DB Connector:** mysql-connector-j-9.6.0.jar
-- **Data Structures:** 
-  - LinkedList (patient queue in PatientDAO)
-  - ArrayList (appointment list in AppointmentDAO)
-- **IDE:** VS Code with Java Extension Pack
-- **Build:** Manual javac compilation
+| Component | Technology |
+|-----------|-----------|
+| **Frontend** | Java Swing (javax.swing) |
+| **Backend** | Core Java & JDBC |
+| **Database** | MySQL 5.7+ |
+| **JDBC Driver** | mysql-connector-j-9.6.0 |
+| **Build** | Manual javac compilation |
+| **IDE** | VS Code / IntelliJ / Eclipse |
 
 ---
 
-## 📦 FEATURES
+## 📋 Prerequisites
 
-### 1. **Dashboard**
-   - Total patients count
-   - Today's appointments count
-   - Doctor statistics
-   - Real-time database connection status
+Before you begin, ensure you have installed:
 
-### 2. **Patient Management**
-   - Register new patients with validation
-   - View all registered patients
-   - Search patients by name or phone
-   - Patient details: ID, name, age, gender, blood group, phone, email, address, medical history
-   - Patient status tracking (Active, Discharged, Critical)
+- **Java JDK** 11 or higher ([Download](https://www.oracle.com/java/technologies/downloads/))
+- **MySQL Server** 5.7 or higher ([Download](https://dev.mysql.com/downloads/mysql/))
+- **Git** (optional, for version control)
+- **VS Code** or any Java IDE (optional)
 
-### 3. **Appointment Booking**
-   - Select patient and doctor from dropdowns
-   - Choose department and time slot
-   - Auto-generate token numbers
-   - View all appointments with patient/doctor details
-   - Track appointment status (Scheduled, Completed, Cancelled, Pending)
-
-### 4. **Data Persistence**
-   - All data stored in MySQL database
-   - 8 pre-loaded doctors with specializations
-   - Referential integrity with foreign keys
-   - Timestamps for all operations
-
----
-
-## ⚙️ SETUP INSTRUCTIONS
-
-### Step 1: Install MySQL
+**Verify installations:**
 ```bash
-# macOS (using Homebrew)
-brew install mysql
+java -version
+mysql --version
+```
 
-# Start MySQL service
+---
+
+## ⚙️ Setup Instructions
+
+### Step 1: Clone or Download the Project
+
+```bash
+# Using Git
+git clone https://github.com/DevangSaini19/Hospital-management-System.git
+cd Hospital-management-System
+
+# Or download and extract the ZIP file
+```
+
+### Step 2: Install MySQL and Create Database
+
+**Start MySQL:**
+```bash
+# macOS
 brew services start mysql
 
-# Secure installation
-mysql_secure_installation
+# Linux
+sudo systemctl start mysql
+
+# Windows
+# Start MySQL via Services or MySQL Workbench
 ```
 
-### Step 2: Create Database
+**Create Database:**
 ```bash
-# Open MySQL command line
-mysql -u root -p
-
-# Run the SQL script
-SOURCE /path/to/Hospital\ Management/database/hospital_db.sql;
+mysql -u root -p < database/hospital_db.sql
 ```
 
-### Step 3: Update Database Credentials
-Edit `src/db/DBConnection.java`:
-```java
-private static final String PASSWORD = "your_mysql_password"; // ← Change this
-```
+When prompted, enter your MySQL root password.
 
-### Step 4: Verify MySQL Connector
-Ensure `lib/mysql-connector-j-9.6.0/` exists with JAR files.
+### Step 3: Configure Database Credentials
 
-### Step 5: Compile Project
+**⚠️ SECURITY WARNING:** Never hardcode passwords in source code!
+
+**Option A: Using Environment Variables (Recommended)**
+
 ```bash
-cd "/Users/devangsaini/Desktop/Hospital Management"
-javac -cp "lib/*" -d bin $(find src -name "*.java")
+# macOS/Linux
+export DB_URL="jdbc:mysql://localhost:3306/hospital_db"
+export DB_USER="root"
+export DB_PASSWORD="YOUR_DB_PASSWORD"
+
+# Windows (PowerShell)
+$env:DB_URL = "jdbc:mysql://localhost:3306/hospital_db"
+$env:DB_USER = "root"
+$env:DB_PASSWORD = "YOUR_DB_PASSWORD"
 ```
 
-### Step 6: Run Application (VS Code)
-1. Install **Extension Pack for Java** by Microsoft
-2. Open `src/Main.java`
-3. Right-click → **Run Java** (or click ▶️ Play button)
+**Option B: Using Configuration File**
 
-### Step 7: Run Application (Terminal)
+Create/Update `src/config/db.properties`:
+```properties
+db.url=jdbc:mysql://localhost:3306/hospital_db
+db.user=root
+db.password=YOUR_DB_PASSWORD
+```
+
+**Important:** `db.properties` is already in `.gitignore` to prevent accidentally pushing credentials.
+
+### Step 4: Compile the Project
+
 ```bash
-cd "/Users/devangsaini/Desktop/Hospital Management"
-java -cp "lib/*:bin" Main
-```
+cd "youser Interface
 
----
+### Color Scheme
 
-## 🎨 UI COLOR SCHEME
-
-| Element | Color | Hex |
-|---------|-------|-----|
-| Primary (Header/Sidebar) | Deep Blue | #006699 |
-| Accent (Buttons) | Green | #009966 |
+| Element | Color | Hex Code |
+|---------|-------|----------|
+| Header & Sidebar | Deep Blue | #006699 |
+| Buttons & Highlights | Green | #009966 |
 | Background | Light Blue | #F5F8FC |
-| Text | White/Dark | #FFFFFF / #333333 |
+| Text (Primary) | Dark Gray | #333333 |
+| Text (Secondary) | White | #FFFFFF |
 
----
+### Main Sections
 
-## 📊 DATABASE SCHEMA
-
-### **DOCTORS TABLE**
+1. **Dashboard** - Overview with statistics
+2. *DOCTORS Table
 ```sql
 CREATE TABLE doctors (
-    doctor_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100),
-    specialization VARCHAR(100),
+    doctor_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    specialization VARCHAR(100) NOT NULL,
     phone VARCHAR(15),
     email VARCHAR(100)
 );
 ```
 
-### **PATIENTS TABLE**
+### PATIENTS Table
 ```sql
 CREATE TABLE patients (
-    patient_id INT PRIMARY KEY AUTO_INCREMENT,
-    first_name VARCHAR(50),
+    patient_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    age INT NOT NULL,
+    gender ENUM('Male', 'Female', 'Other') NOT NULL,
+    blood_group ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') NOT NULL,
+    phone VARCHAR(15) NOT NULL UNIQUE,
+    email VARCHAR(100),
+    address TEXT,
+    medical_history TEXT,
+    registration_date DATE DEFAULT CURRENT_DATE,
+    status ENUM('Active', 'Discharged', 'Critical') DEFAULT 'Active'
+);
+```
+
+### APPOINTMENTS Table
+```sql
+CREATE TABLE appointments (
+    appointment_id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT NOT NULL,
+    doctor_id INT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    department VARCHAR(100) NOT NULL,
+    reason TEXT,
+    status ENUM('Scheduled', 'Completed', 'Cancelled', 'Pending') DEFAULT 'Scheduled',
+    token_number INT,
+    notes TEXT,
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id) ON DELETE CASCADE
+);
+```
+
+---
+
+## 🔐 Security Practices
+
+✅ **Implemented:**
+- No hardcoded credentials in source code
+- Passwords stored in `.env` or configuration files (excluded via `.gitignore`)
+- Input validation for all user entries
+- SQL injection prevention using PreparedStatements
+- Secure password handling with environment variables
+
+✅ **Best Practices:**
+- Always use `.gitignore` to exclude sensitive files
+- Never commit `db.properties` or `.env` files
+- Rotate passwords regularly
+- Use strong, complex passwords
+- Keep MySQL and Java updated
+
+---
+
+## 🐛 Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **Connection refused** | Ensure MySQL is running: `brew services start mysql` |
+| **Database not found** | Run: `mysql -u root -p < database/hospital_db.sql` |
+| **Compilation error** | Check Java version: `java -version` (requires 11+) |
+| **ClassNotFoundException** | Ensure MySQL JDBC driver is in `lib/` folder |
+| **Wrong password error** | Update credentials in `src/config/db.properties` |
+
+---
+
+## 📝 Usage Examples
+
+### Adding a Patient (GUI)
+1. Click "➕ Add Patient" tab
+2. Fill in all fields with valid data
+3. Click "Add Patient" button
+4. Confirm success message
+
+### Booking an Appointment (GUI)
+1. Click "📅 Appointment" tab
+2. Select patient and doctor from dropdowns
+3. Enter appointment date and time
+4. Click "Book Appointment" button
+5. Receive appointment confirmation with token number
+
+### Searching Patients (GUI)
+1. Click "👥 All Patients" tab
+2. View list of all registered patients
+3. Use dashboard search feature for specific patients
+
+---
+
+## 👥 Team Collaboration
+
+**For Team Members:**
+1. Clone the repository: `git clone [repository-url]`
+2. Create own database using: `mysql -u root -p < database/hospital_db.sql`
+3. Set up credentials in `src/config/db.properties` (won't be tracked by Git)
+4. Compile and run the project
+5. Create new branches for features: `git checkout -b feature/your-feature`
+
+---
+
+## 📄 License
+
+This project is provided as-is for educational purposes.
+
+---
+
+## ✉️ Contact & Support
+
+- **Issues/Feedback:** Report via GitHub Issues
+- **Questions:** Contact the development team
+- **Contributing:** Submit pull requests for improvements
+
+---
+
+## 🔑 KEY CLASSES & METHODS
+
+### **DBConnection.java**
+- `getConnection()` - Get or create database connection
+- `testConnection()` - Verify database connectivity
     last_name VARCHAR(50),
     age INT,
     gender ENUM('Male', 'Female', 'Other'),

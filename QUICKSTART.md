@@ -1,103 +1,148 @@
-# Hospital Management System — Quick Start Guide
+# ⚡ Quick Start Guide
 
-## ✅ Project Setup Complete!
-
-All files have been created and compiled successfully. The project structure is ready to use.
+Get your Hospital Management System running in 5 minutes!
 
 ---
 
-## 📂 Project Files Created
+## 📋 Prerequisites
 
-```
-✅ src/Main.java                    (10 lines)   - Entry point with Swing initialization
-✅ src/db/DBConnection.java         (27 lines)   - MySQL connection manager
-✅ src/models/Patient.java          (75 lines)   - Patient model with getters/setters
-✅ src/models/Appointment.java      (50 lines)   - Appointment model
-✅ src/dao/PatientDAO.java          (130 lines)  - Data Access with LinkedList queue
-✅ src/dao/AppointmentDAO.java      (110 lines)  - Data Access with ArrayList
-✅ src/ui/MainDashboard.java        (185 lines)  - Main window (CardLayout)
-✅ src/ui/AddPatientForm.java       (150 lines)  - Patient registration form (GridBagLayout)
-✅ src/ui/AppointmentForm.java      (160 lines)  - Appointment booking form
-✅ database/hospital_db.sql         (60 lines)   - MySQL schema + sample doctors
-✅ .vscode/settings.json            - Java/classpath configuration
-✅ README.md                        - Full documentation
-```
-
-**Total:** 1,057 lines of code + database schema  
-**Compilation Status:** ✅ All files compile without errors
+- Java JDK 11+ installed
+- MySQL 5.7+ installed and running
+- Project folder downloaded/cloned
 
 ---
 
-## 🚀 Next Steps (REQUIRED)
+## 🚀 5-Minute Setup
 
-### 1️⃣ **Start MySQL Server**
+### 1️⃣ Create Database (30 seconds)
+
 ```bash
-brew services start mysql
+mysql -u root -p < database/hospital_db.sql
 ```
 
-### 2️⃣ **Create Database**
+Enter your MySQL root password when prompted.
+
+### 2️⃣ Set Database Credentials (30 seconds)
+
+**Using Environment Variables:**
 ```bash
-mysql -u root -p < "/Users/devangsaini/Desktop/Hospital Management/database/hospital_db.sql"
-```
-When prompted, enter your MySQL password.
-
-### 3️⃣ **Update Database Password**
-Edit `src/db/DBConnection.java` line 7:
-```java
-private static final String PASSWORD = "your_mysql_password"; // ← CHANGE THIS
+export DB_URL="jdbc:mysql://localhost:3306/hospital_db"
+export DB_USER="root"
+export DB_PASSWORD="YOUR_DB_PASSWORD"
 ```
 
-### 4️⃣ **Recompile (if you changed password)**
+**Or Edit Configuration File:**
+Edit `src/config/db.properties`:
+```properties
+db.password=YOUR_DB_PASSWORD
+```
+
+### 3️⃣ Compile Project (1 minute)
+
 ```bash
-cd "/Users/devangsaini/Desktop/Hospital Management"
-javac -cp "lib/*" -d bin $(find src -name "*.java")
+cd "your-project-folder"
+javac -cp "lib/mysql-connector-j-9.6.0/*:src" \
+  src/models/*.java src/db/*.java src/dao/*.java \
+  src/utils/*.java src/ui/*.java src/Main.java -d bin/
 ```
 
-### 5️⃣ **Run the Application**
-
-**Option A: From VS Code**
-- Open `src/Main.java`
-- Click the ▶️ **Run** button at the top
-
-**Option B: From Terminal**
+**Quick Alias (Optional):**
+Add to `.zshrc` or `.bash_profile`:
 ```bash
-cd "/Users/devangsaini/Desktop/Hospital Management"
-java -cp "lib/*:bin" Main
+alias compile-hms='javac -cp "lib/mysql-connector-j-9.6.0/*:src" \
+  src/models/*.java src/db/*.java src/dao/*.java \
+  src/utils/*.java src/ui/*.java src/Main.java -d bin/'
+```
+
+Then just run: `compile-hms`
+
+### 4️⃣ Run Application (30 seconds)
+
+```bash
+java -cp "lib/mysql-connector-j-9.6.0/*:bin" Main
+```
+
+**That's it!** The GUI window will open automatically.
+
+---
+
+## ✅ Verify Everything Works
+
+### Check 1: Database Connection
+- Dashboard shows ✅ "Connected to MySQL Database"
+- Total Patients: 3 (default demo data)
+- Appointments: 2
+
+### Check 2: Add a Patient
+1. Click "➕ Add Patient"
+2. Fill in form with valid data
+3. Click "Add Patient"
+4. Success message appears
+
+### Check 3: Book Appointment
+1. Click "📅 Appointment"
+2. Select patient and doctor
+3. Enter date/time
+4. Book and get token number
+
+---
+
+## 🔧 Common Issues
+
+| Issue | Fix |
+|-------|-----|
+| `Connection refused` | Start MySQL: `brew services start mysql` |
+| `database hospital_db doesn't exist` | Run: `mysql -u root -p < database/hospital_db.sql` |
+| `ClassNotFoundException` | Check JDBC driver in `lib/` folder |
+| `Wrong password error` | Verify credentials in `src/config/db.properties` |
+| `Compilation failed` | Ensure Java 11+: `java -version` |
+
+---
+
+## 📁 Project Files
+
+```
+✅ Database:        hospital_db.sql (schema + sample doctors)
+✅ Source Code:     src/ (12 Java files)
+✅ JDBC Driver:     lib/mysql-connector-j-9.6.0/
+✅ Config:          src/config/db.properties
+✅ Compiled:        bin/ (created after compilation)
 ```
 
 ---
 
-## 🎯 Application Features
+## 🎯 Next Steps
 
-| Feature | Location | Tech |
-|---------|----------|------|
-| Dashboard | MainDashboard | CardLayout |
-| Patient Registration | AddPatientForm | GridBagLayout + validation |
-| Appointment Booking | AppointmentForm | GridBagLayout + JSplitPane |
-| All Patients View | MainDashboard | JTable |
-| Patient Queue | PatientDAO | LinkedList (queue ops) |
-| Appointments List | AppointmentDAO | ArrayList |
-| Database | hospital_db.sql | MySQL with 8 pre-loaded doctors |
+**Learn More:**
+- Read [README.md](README.md) for detailed documentation
+- Check [SETUP_GUIDE.md](SETUP_GUIDE.md) for configuration options
+- Review [SQL_QUERIES_REFERENCE.sql](SQL_QUERIES_REFERENCE.sql) for database queries
 
----
-
-## 📊 Database Details
-
-**Database Name:** `hospital_db`
-
-**Tables:**
-- `doctors` (8 sample records with specializations)
-- `patients` (empty - ready for registration)
-- `appointments` (empty - ready for bookings)
-
-**Connection:**
-- Host: `localhost:3306`
-- User: `root`
-- Database: `hospital_db`
+**Develop:**
+- Create your own features
+- Extend database tables
+- Customize UI colors
+- Add more validation
 
 ---
 
-## 🔑 Key Implementation Details
+## ⚠️ Security Reminder
+
+✅ **Do NOT commit your credentials to GitHub:**
+- `.env` file is in `.gitignore`
+- `src/config/db.properties` is in `.gitignore`
+- Never push passwords or API keys
+
+✅ **Share safely with team:**
+- Share the `.sql` file only
+- Team members create their own `db.properties`
+- Each member sets their own password
+
+---
+
+**Ready?** Run: `java -cp "lib/mysql-connector-j-9.6.0/*:bin" Main`
+
+Enjoy! 🎉
 
 ✅ **LinkedList Usage:** PatientDAO - patient queue simulation  
 ✅ **ArrayList Usage:** AppointmentDAO - appointment collection  
