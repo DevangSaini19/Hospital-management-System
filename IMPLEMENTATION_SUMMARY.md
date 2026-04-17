@@ -45,7 +45,7 @@ I've completely redesigned your Hospital Management System with **secure, produc
 
 ### ❌ **BEFORE** (Insecure)
 ```java
-private static final String PASSWORD = "dev@2006"; // Hardcoded password!
+private static final String PASSWORD = "YOUR_PASSWORD"; // Hardcoded password!
 ```
 
 ### ✅ **AFTER** (Secure)
@@ -53,12 +53,12 @@ private static final String PASSWORD = "dev@2006"; // Hardcoded password!
 // Environment variables (recommended)
 export DB_URL="jdbc:mysql://localhost:3306/hospital_db"
 export DB_USER="root"
-export DB_PASSWORD="your_secure_password"
+export DB_PASSWORD="YOUR_DB_PASSWORD"
 
 // OR db.properties file
 db.url=jdbc:mysql://localhost:3306/hospital_db
 db.user=root
-db.password=your_secure_password
+db.password=YOUR_DB_PASSWORD
 ```
 
 ---
@@ -198,41 +198,29 @@ ValidationUtil.sanitizeString(String)        // Trim whitespace
 
 ## 🚀 Quick Start Guide
 
-### 1. **Remove Old Password from GitHub**
-
-```bash
-# Option A: Using git-filter-branch (recommended)
-git filter-branch --force --tree-filter \
-  'find . -name "DBConnection.java" -exec sed -i "s/dev@2006//g" {} \;' \
-  HEAD
-
-# Option B: Force push to remove from history
-git push origin --force --all
-```
-
-### 2. **Set Environment Variables**
+### 1. **Set Environment Variables**
 
 **macOS/Linux:**
 ```bash
 export DB_URL="jdbc:mysql://localhost:3306/hospital_db"
 export DB_USER="root"
-export DB_PASSWORD="your_secure_password"
+export DB_PASSWORD="YOUR_DB_PASSWORD"
 ```
 
 **Windows (PowerShell):**
 ```powershell
 $env:DB_URL = "jdbc:mysql://localhost:3306/hospital_db"
 $env:DB_USER = "root"
-$env:DB_PASSWORD = "your_secure_password"
+$env:DB_PASSWORD = "YOUR_DB_PASSWORD"
 ```
 
-### 3. **Create Database**
+### 2. **Create Database**
 
 ```bash
 mysql -u root -p < database/hospital_db.sql
 ```
 
-### 4. **Test Connection**
+### 3. **Test Connection**
 
 ```java
 if (DBConnection.testConnection()) {
@@ -240,7 +228,7 @@ if (DBConnection.testConnection()) {
 }
 ```
 
-### 5. **Add First Patient**
+### 4. **Add First Patient**
 
 ```java
 PatientDAO dao = new PatientDAO();
