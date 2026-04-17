@@ -1,0 +1,94 @@
+# ==================== IDE FILES ====================
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+.DS_Store
+*.class
+
+# ==================== BUILD & OUTPUT ====================
+bin/
+build/
+dist/
+target/
+*.jar
+*.war
+*.ear
+out/
+
+# ==================== LOGS ====================
+*.log
+logs/
+
+# ==================== SENSITIVE DATA - CRITICAL ====================
+# Database configuration with passwords - NEVER COMMIT
+src/config/db.properties
+config/db.properties
+db.properties
+.env
+.env.local
+.env.*.local
+*.properties.local
+*.properties.secret
+
+# API Keys and credentials
+.apikeys
+credentials.json
+secrets.json
+*.key
+*.pem
+*.ppk
+.ssh/
+
+# MySQL backups with data
+*.sql.bak
+*.sql.backup
+mysql_backup/
+database_backup/
+
+# AWS/Cloud credentials
+~/.aws/
+.aws/credentials
+
+# Google Cloud credentials
+google-credentials.json
+gcloud-key.json
+
+# Private configuration
+private/
+secret/
+.secrets/
+
+# ==================== GRADLE & MAVEN ====================
+.gradle/
+gradle-wrapper.jar
+gradle-wrapper.properties
+mvn/
+.mvn/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+
+# ==================== DATABASE ====================
+*.db
+*.sqlite
+*.sql.bak
+
+# ==================== OS FILES ====================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ==================== NODE MODULES (if applicable) ====================
+node_modules/
+package-lock.json
+yarn.lock
+
+# ==================== MISC ====================
+*.tmp
+temp/
+cache/
