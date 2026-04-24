@@ -370,23 +370,25 @@ public class AppointmentDAO {
      * @return Next token number
      */
     private int generateTokenNumber(String date) {
-        String sql = "SELECT COUNT(*) FROM appointments WHERE appointment_date = ?";
+        // Generate globally unique token number using MAX(token_number) + 1
+        String sql = "SELECT MAX(token_number) FROM appointments";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
 
-            pst.setString(1, date);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    int token = rs.getInt(1) + 1;
-                    System.out.println("Generated token number: " + token);
-                    return token;
+                    int maxToken = rs.getInt(1);
+                    // If no appointments exist, maxToken will be 0
+                    int nextToken = maxToken + 1;
+                    System.out.println("✓ Generated unique token number: " + nextToken);
+                    return nextToken;
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error generating token number: " + e.getMessage());
+            System.err.println("✗ Error generating token number: " + e.getMessage());
             e.printStackTrace();
         }
-        return 1; // Default to 1 if error
+        return 1; // Default to 1 if error or no appointments exist
     }
 
     /**

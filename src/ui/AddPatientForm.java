@@ -67,9 +67,10 @@ public class AddPatientForm extends JPanel {
         form.add(cbBlood, gbc);
 
         gbc.gridx = 2;
-        form.add(new JLabel("Phone *"), gbc);
+        form.add(new JLabel("Phone (10 digits) *"), gbc);
         gbc.gridx = 3;
         txtPhone = new JTextField(15);
+        txtPhone.setToolTipText("Enter 10-digit phone number (e.g., 9876543210)");
         form.add(txtPhone, gbc);
 
         // Row 3
@@ -137,6 +138,17 @@ public class AddPatientForm extends JPanel {
                                           "Validation Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        // Validate phone format before attempting to save
+        String phone = txtPhone.getText().trim();
+        if (!phone.matches("^[0-9]{10}$")) {
+            JOptionPane.showMessageDialog(this, 
+                "Invalid phone number!\n\n" +
+                "Phone must be exactly 10 digits (e.g., 9876543210)\n" +
+                "Currently entered: " + phone,
+                "Phone Number Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         try {
             int age = Integer.parseInt(txtAge.getText().trim());
@@ -159,10 +171,16 @@ public class AddPatientForm extends JPanel {
                     "✅ Patient Registered Successfully!\nPatient ID: " + p.getPatientId(),
                     "Success", JOptionPane.INFORMATION_MESSAGE);
                 clearForm();
-                // Refresh dashboard to show updated patient count
-                dashboard.updatePatientCount();
+                // Refresh dashboard and all patient list to show updated data
+                dashboard.refreshDashboard();
             } else {
-                JOptionPane.showMessageDialog(this, "❌ Failed to save patient. Phone may already exist.",
+                JOptionPane.showMessageDialog(this, 
+                    "❌ Failed to save patient!\n\n" +
+                    "Possible reasons:\n" +
+                    "• Phone number already exists (must be unique)\n" +
+                    "• Database connection error\n" +
+                    "• Invalid data in one of the fields\n\n" +
+                    "Please try again with a different phone number.",
                     "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException ex) {

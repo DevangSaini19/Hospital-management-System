@@ -26,12 +26,16 @@ public class ValidationUtil {
     }
 
     /**
-     * Validate phone number (10 digits)
+     * Validate phone number (10 digits, ignores spaces and dashes)
      * @param phone Phone number to validate
      * @return true if valid, false otherwise
      */
     public static boolean isValidPhone(String phone) {
-        return phone != null && PHONE_PATTERN.matcher(phone).matches();
+        if (phone == null) return false;
+        // Remove all spaces, dashes, and parentheses
+        String cleaned = phone.replaceAll("[\\s\\-()]+", "");
+        // Check if it's exactly 10 digits
+        return cleaned.matches("^[0-9]{10}$");
     }
 
     /**

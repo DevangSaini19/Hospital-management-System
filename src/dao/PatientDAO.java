@@ -40,7 +40,7 @@ public class PatientDAO {
     public boolean addPatient(Patient patient) {
         // Input validation
         if (!validatePatientInput(patient)) {
-            System.err.println("Invalid patient data provided");
+            System.err.println("✗ Invalid patient data provided. Please check all fields.");
             return false;
         }
 
@@ -139,7 +139,7 @@ public class PatientDAO {
             return false;
         }
         if (!ValidationUtil.isValidPhone(phone)) {
-            System.err.println("Invalid phone number (must be 10 digits)");
+            System.err.println("✗ Invalid phone number. Must be 10 digits (e.g., 9876543210). Received: " + phone);
             return false;
         }
 
