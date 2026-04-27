@@ -8,7 +8,10 @@ import models.Appointment;
 import models.Patient;
 
 import javax.swing.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -36,17 +39,25 @@ public class MainDashboard extends JFrame {
     public MainDashboard() {
         setTitle("Hospital Management System — Bombay Hospital");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 750);
+        setSize(1400, 800);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         getContentPane().setBackground(WHITE_BG);
 
+        // Top Panel: Header + Top Navigation (combined)
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.setBackground(WHITE_BG);
+        
         // Professional Header Panel with Logo Area
         JPanel header = createHeaderPanel();
-        add(header, BorderLayout.NORTH);
-
-        // Professional Sidebar Navigation
-        JPanel sidebar = createSidebarPanel();
+        topPanel.add(header);
+        
+        // Horizontal Top Navigation Menu
+        JPanel topNav = createTopNavigationPanel();
+        topPanel.add(topNav);
+        
+        add(topPanel, BorderLayout.NORTH);
 
         // Content Area with CardLayout
         contentArea = new JPanel(new CardLayout());
@@ -79,7 +90,6 @@ public class MainDashboard extends JFrame {
         billingForm = new BillingForm(billDAO, patientDAO, doctorDAO, this);
         contentArea.add(billingForm, "💳 Billing");
 
-        add(sidebar, BorderLayout.WEST);
         add(contentArea, BorderLayout.CENTER);
 
         // Status Bar
@@ -266,40 +276,39 @@ public class MainDashboard extends JFrame {
     }
 
     /**
-     * Create professional sidebar with navigation buttons
+     * Create professional horizontal top navigation menu
      */
-    private JPanel createSidebarPanel() {
-        JPanel sidebar = new JPanel();
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(MAROON);
-        sidebar.setPreferredSize(new Dimension(220, 0));
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(100, 0, 0)));
+    private JPanel createTopNavigationPanel() {
+        JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 10));
+        navPanel.setBackground(MAROON);
+        navPanel.setPreferredSize(new Dimension(0, 55));
+        navPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(100, 0, 0)));
 
         // Navigation items
         String[] menuItems = {"📋 Dashboard", "➕ Add Patient", "👥 All Patients", "📅 Appointments", "🕐 Book Appointment", "👨‍⚕️ Doctor Management", "💳 Billing"};
 
         for (String item : menuItems) {
             JButton btn = new JButton(item);
-            btn.setMaximumSize(new Dimension(220, 55));
-            btn.setMinimumSize(new Dimension(220, 55));
-            btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            btn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
             btn.setForeground(WHITE_BG);
             btn.setBackground(MAROON);
             btn.setBorderPainted(false);
             btn.setFocusPainted(false);
             btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            btn.setHorizontalAlignment(SwingConstants.LEFT);
-            btn.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+            btn.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+            btn.setPreferredSize(new Dimension(180, 40));
 
-            // Professional hover effect
+            // Professional hover effect for top nav
             btn.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
                     btn.setBackground(LIGHT_MAROON);
+                    btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
                 }
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent e) {
                     btn.setBackground(MAROON);
+                    btn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
                 }
             });
 
@@ -313,54 +322,252 @@ public class MainDashboard extends JFrame {
                 }
             });
 
-            sidebar.add(btn);
-            sidebar.add(Box.createVerticalStrut(2));
+            navPanel.add(btn);
         }
 
-        // Add vertical glue at bottom
-        sidebar.add(Box.createVerticalGlue());
-
-        return sidebar;
+        return navPanel;
     }
 
     /**
-     * Create professional dashboard with stats cards
+     * Create dashboard matching second image layout with hero banner and scrolling
      */
     private JPanel createDashboardPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(LIGHT_GRAY);
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+        panel.setBackground(WHITE_BG);
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
+        // ===== HERO BANNER SECTION =====
+        JPanel heroBanner = createHeroBanner();
+        panel.add(heroBanner, BorderLayout.NORTH);
+
+        // ===== SCROLLABLE MAIN CONTENT SECTION =====
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(WHITE_BG);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
         // Title
-        JLabel dashboardTitle = new JLabel("Dashboard Overview");
-        dashboardTitle.setFont(new Font("Georgia", Font.BOLD, 24));
-        dashboardTitle.setForeground(MAROON);
+        JLabel dashboardTitle = new JLabel("Hospital Dashboard");
+        dashboardTitle.setFont(new Font("Georgia", Font.BOLD, 36));
+        dashboardTitle.setForeground(new Color(0, 0, 0));
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         titlePanel.setOpaque(false);
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
         titlePanel.add(dashboardTitle);
-        panel.add(titlePanel, BorderLayout.NORTH);
+        contentPanel.add(titlePanel, BorderLayout.NORTH);
 
-        // Stats Cards Container
-        JPanel cardsContainer = new JPanel(new GridLayout(1, 4, 25, 0));
+        // Stats Cards Container - 2x2 Grid
+        JPanel cardsContainer = new JPanel(new GridLayout(2, 2, 30, 30));
         cardsContainer.setOpaque(false);
-        cardsContainer.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        cardsContainer.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
 
         lblPatients = createStatCard("👥 Total Patients", String.valueOf(patientDAO.getTotalPatientCount()), 
-                                     new Color(41, 128, 185), cardsContainer);    // Professional Blue
+                                     new Color(41, 128, 185), cardsContainer);
         lblAppointments = createStatCard("📅 Today's Appointments", String.valueOf(appointmentDAO.getTotalAppointmentCount()), 
-                                         new Color(230, 126, 34), cardsContainer); // Professional Orange
+                                         new Color(230, 126, 34), cardsContainer);
         lblDoctors = createStatCard("👨‍⚕️ Total Doctors", String.valueOf(doctorDAO.getTotalDoctorCount()), 
-                                   new Color(46, 139, 87), cardsContainer);      // Professional Green
+                                   new Color(46, 139, 87), cardsContainer);
         lblBills = createStatCard("💳 Total Bills", String.valueOf(billDAO.getTotalBillsCount()), 
-                                  new Color(155, 89, 182), cardsContainer);      // Professional Purple
+                                  new Color(155, 89, 182), cardsContainer);
 
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.setOpaque(false);
         centerPanel.add(cardsContainer, BorderLayout.NORTH);
         centerPanel.add(Box.createVerticalGlue(), BorderLayout.CENTER);
 
-        panel.add(centerPanel, BorderLayout.CENTER);
+        contentPanel.add(centerPanel, BorderLayout.CENTER);
+
+        // Create scroll pane for the content area
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        panel.add(scrollPane, BorderLayout.CENTER);
         return panel;
+    }
+
+    /**
+     * Create hero banner section with background image and gradient overlay
+     */
+    private JPanel createHeroBanner() {
+        JPanel bannerPanel = new JPanel() {
+            private BufferedImage backgroundImage;
+            
+            {
+                // Load background image
+                try {
+                    String imagePath = System.getProperty("user.dir") + "/resources/bombay-hospital-jaipur-gallery-3.jpg";
+                    java.io.File imageFile = new java.io.File(imagePath);
+                    if (imageFile.exists()) {
+                        backgroundImage = javax.imageio.ImageIO.read(imageFile);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error loading banner image: " + e.getMessage());
+                }
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
+                int width = getWidth();
+                int height = getHeight();
+
+                // Draw background image scaled properly
+                if (backgroundImage != null) {
+                    // Scale image to fit the panel while maintaining aspect ratio
+                    int imgWidth = backgroundImage.getWidth();
+                    int imgHeight = backgroundImage.getHeight();
+                    
+                    // Calculate scaling to cover the panel
+                    double scaleX = (double) width / imgWidth;
+                    double scaleY = (double) height / imgHeight;
+                    double scale = Math.max(scaleX, scaleY);
+                    
+                    int scaledWidth = (int) (imgWidth * scale);
+                    int scaledHeight = (int) (imgHeight * scale);
+                    
+                    int offsetX = (width - scaledWidth) / 2;
+                    int offsetY = (height - scaledHeight) / 2;
+                    
+                    g2d.drawImage(backgroundImage, offsetX, offsetY, scaledWidth, scaledHeight, null);
+                } else {
+                    // Fallback color if image not found
+                    g2d.setColor(new Color(200, 200, 200));
+                    g2d.fillRect(0, 0, width, height);
+                }
+
+                // Draw gradient overlay (left to right: opaque gray to transparent)
+                Paint gradientPaint = new GradientPaint(0, 0, new Color(240, 240, 240, 240),
+                                                        width, 0, new Color(0, 0, 0, 30));
+                g2d.setPaint(gradientPaint);
+                g2d.fillRect(0, 0, width, height);
+            }
+        };
+
+        bannerPanel.setLayout(new BorderLayout());
+        bannerPanel.setPreferredSize(new Dimension(0, 280));
+        bannerPanel.setOpaque(true);
+
+        // Content Panel - Text and Badge with absolute positioning
+        JPanel contentPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                // No background - transparent
+            }
+        };
+        contentPanel.setOpaque(false);
+        contentPanel.setLayout(null); // Absolute positioning for flexibility
+
+        // 75 YEARS BADGE - FULL TEXT (positioned absolutely on top-left)
+        JLabel badgeLabel = createYearsBadge();
+        badgeLabel.setBounds(10, 15, 330, 100);
+        contentPanel.add(badgeLabel);
+
+        // Left Content Area with text
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+        textPanel.setOpaque(false);
+        textPanel.setBorder(BorderFactory.createEmptyBorder(60, 50, 0, 0));
+
+        // Breadcrumb
+        JPanel breadcrumbPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        breadcrumbPanel.setOpaque(false);
+        JLabel homeLink = new JLabel("HOME");
+        homeLink.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        homeLink.setForeground(new Color(0, 123, 255));
+        JLabel separator = new JLabel(">");
+        separator.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        separator.setForeground(new Color(150, 150, 150));
+        JLabel spotlightLink = new JLabel("DEPARTMENTS SPOTLIGHT");
+        spotlightLink.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        spotlightLink.setForeground(MAROON);
+        breadcrumbPanel.add(homeLink);
+        breadcrumbPanel.add(separator);
+        breadcrumbPanel.add(spotlightLink);
+        textPanel.add(breadcrumbPanel);
+
+        // Main Heading
+        JLabel heading = new JLabel("Departments Spotlight");
+        heading.setFont(new Font("Georgia", Font.BOLD, 44));
+        heading.setForeground(new Color(0, 0, 0));
+        heading.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+        textPanel.add(heading);
+
+        contentPanel.add(textPanel);
+        bannerPanel.add(contentPanel, BorderLayout.CENTER);
+
+        return bannerPanel;
+    }
+
+    /**
+     * Create the 75 YEARS badge with full text and arrow shape
+     */
+    private JLabel createYearsBadge() {
+        JLabel badge = new JLabel();
+        badge.setIcon(new javax.swing.Icon() {
+            @Override
+            public int getIconWidth() {
+                return 320;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return 100;
+            }
+
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+                int width = getIconWidth();
+                int height = getIconHeight();
+                int arrowWidth = 80;
+
+                // Draw arrow/pointer shape
+                // Left blue section (arrow)
+                int[] xPointsArrow = {x, x + arrowWidth, x + arrowWidth + 20, x + arrowWidth, x};
+                int[] yPointsArrow = {y + height / 2 - 40, y + 10, y + height / 2, y + height - 10, y + height / 2 + 40};
+                g2d.setColor(new Color(41, 128, 185)); // Blue
+                g2d.fillPolygon(xPointsArrow, yPointsArrow, 5);
+
+                // Right grey section (text area)
+                g2d.setColor(new Color(220, 220, 220)); // Light grey
+                g2d.fillRect(x + arrowWidth, y + 10, width - arrowWidth, height - 20);
+
+                // Add shadow/border effect
+                g2d.setColor(new Color(150, 150, 150));
+                g2d.setStroke(new BasicStroke(1));
+                g2d.drawRect(x + arrowWidth, y + 10, width - arrowWidth - 1, height - 20 - 1);
+
+                // Draw "75" in large yellow text
+                g2d.setFont(new Font("Georgia", Font.BOLD, 56));
+                g2d.setColor(new Color(255, 200, 0)); // Yellow
+                g2d.drawString("75", x + 12, y + 62);
+
+                // Draw "YEARS" in yellow
+                g2d.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                g2d.setColor(new Color(255, 200, 0)); // Yellow
+                g2d.drawString("YEARS", x + 15, y + 82);
+
+                // Draw "OF MEDICAL CARE YOU CAN TRUST" in red on the right
+                g2d.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                g2d.setColor(MAROON); // Red/Maroon
+                g2d.drawString("OF", x + arrowWidth + 15, y + 28);
+                g2d.drawString("MEDICAL", x + arrowWidth + 15, y + 42);
+                g2d.drawString("CARE YOU", x + arrowWidth + 15, y + 56);
+                g2d.drawString("CAN TRUST", x + arrowWidth + 15, y + 70);
+            }
+        });
+
+        return badge;
     }
 
     /**

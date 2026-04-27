@@ -195,7 +195,12 @@ public class BillingForm extends JPanel {
         panel.setBorder(BorderFactory.createTitledBorder("Bills History"));
 
         // Table
-        tableModel = new DefaultTableModel();
+        tableModel = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;  // Make all cells non-editable
+            }
+        };
         tableModel.setColumnIdentifiers(new String[]{"Bill ID", "Patient", "Doctor", "Doctor Fee", "Medicine", "Room", "Other", "Total", "Date"});
         billTable = new JTable(tableModel);
         billTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

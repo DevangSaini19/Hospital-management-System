@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS bills (
     other_charges DOUBLE NOT NULL DEFAULT 0,
     total_amount DOUBLE NOT NULL DEFAULT 0,
     bill_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE,
+     FOREIGN KEY (patient_id) REFERENCES patients(patient_id) ON DELETE CASCADE,
     FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id) ON DELETE CASCADE,
     FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id) ON DELETE SET NULL,
     INDEX idx_patient_id (patient_id),
