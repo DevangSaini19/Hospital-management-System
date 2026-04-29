@@ -20,7 +20,7 @@ import java.util.LinkedList;
  */
 public class BillingForm extends JPanel {
 
-    private JComboBox<String> cbPatient, cbDoctor;
+    private JComboBox<String> cbPatient, cbDoctor, cbPaymentMethod, cbPaymentStatus;
     private JTextField txtDoctorFee, txtMedicineCharges, txtRoomCharges, txtOtherCharges, txtTotal;
     private JButton btnGenerateBill, btnClear, btnPrint, btnViewBills;
     private JLabel lblMessage;
@@ -158,9 +158,26 @@ public class BillingForm extends JPanel {
         lblMessage.setForeground(MAROON);
         panel.add(lblMessage, gbc);
 
-        // Row 4: Buttons
+        // Row 4: Payment Method & Payment Status
         gbc.gridx = 0;
         gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        panel.add(new JLabel("Payment Method *"), gbc);
+        gbc.gridx = 1;
+        cbPaymentMethod = new JComboBox<>(new String[]{"Cash", "UPI", "Insurance"});
+        cbPaymentMethod.setSelectedIndex(0);
+        panel.add(cbPaymentMethod, gbc);
+
+        gbc.gridx = 2;
+        panel.add(new JLabel("Payment Status *"), gbc);
+        gbc.gridx = 3;
+        cbPaymentStatus = new JComboBox<>(new String[]{"Unpaid", "Partial Paid", "Paid"});
+        cbPaymentStatus.setSelectedIndex(0);
+        panel.add(cbPaymentStatus, gbc);
+
+        // Row 5: Buttons
+        gbc.gridx = 0;
+        gbc.gridy = 5;
         gbc.gridwidth = 4;
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
         buttonsPanel.setOpaque(false);
@@ -201,22 +218,55 @@ public class BillingForm extends JPanel {
                 return false;  // Make all cells non-editable
             }
         };
-        tableModel.setColumnIdentifiers(new String[]{"Bill ID", "Patient", "Doctor", "Doctor Fee", "Medicine", "Room", "Other", "Total", "Date"});
+        tableModel.setColumnIdentifiers(new String[]{"Bill ID", "Patient", "Doctor", "Doctor Fee", "Medicine", "Room", "Other", "Total", "Payment Method", "Payment Status", "Date"});
         billTable = new JTable(tableModel);
         billTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        billTable.setRowHeight(25);
+        billTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        billTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        
+        // Set column widths
+        billTable.getColumnModel().getColumn(0).setPreferredWidth(60);  // Bill ID
+        billTable.getColumnModel().getColumn(1).setPreferredWidth(120); // Patient
+        billTable.getColumnModel().getColumn(2).setPreferredWidth(150); // Doctor
+        billTable.getColumnModel().getColumn(3).setPreferredWidth(90);  // Doctor Fee
+        billTable.getColumnModel().getColumn(4).setPreferredWidth(90);  // Medicine
+        billTable.getColumnModel().getColumn(5).setPreferredWidth(80);  // Room
+        billTable.getColumnModel().getColumn(6).setPreferredWidth(80);  // Other
+        billTable.getColumnModel().getColumn(7).setPreferredWidth(90);  // Total
+        billTable.getColumnModel().getColumn(8).setPreferredWidth(120); // Payment Method
+        billTable.getColumnModel().getColumn(9).setPreferredWidth(120); // Payment Status
+        billTable.getColumnModel().getColumn(10).setPreferredWidth(100); // Date
+        
         billTable.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (column > 3 && column < 8) {
-                    ((JLabel) c).setHorizontalAlignment(SwingConstants.RIGHT);
+                JLabel label = (JLabel) c;
+                
+                // Center align Bill ID and Date columns
+                if (column == 0 || column == 10) {
+                    label.setHorizontalAlignment(SwingConstants.CENTER);
                 }
+                // Center align Payment Method and Payment Status
+                else if (column == 8 || column == 9) {
+                    label.setHorizontalAlignment(SwingConstants.CENTER);
+                }
+                // Right align numeric columns (Doctor Fee, Medicine, Room, Other, Total)
+                else if (column >= 3 && column <= 7) {
+                    label.setHorizontalAlignment(SwingConstants.RIGHT);
+                }
+                // Left align text columns
+                else {
+                    label.setHorizontalAlignment(SwingConstants.LEFT);
+                }
+                
                 return c;
             }
         });
 
         JScrollPane scrollPane = new JScrollPane(billTable);
-        scrollPane.setPreferredSize(new Dimension(800, 250));
+        scrollPane.setPreferredSize(new Dimension(1000, 250));
         panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
@@ -291,6 +341,10 @@ public class BillingForm extends JPanel {
             }
 
             Bill bill = new Bill(patientId, doctorId, doctorFee, medicine, room, other);
+            
+            // Set payment method and status from dropdowns
+            bill.setPaymentMethod((String) cbPaymentMethod.getSelectedItem());
+            bill.setPaymentStatus((String) cbPaymentStatus.getSelectedItem());
 
             if (billDAO.generateBill(bill)) {
                 showMessage("✓ Bill generated successfully! Bill ID: " + bill.getBillId(), false);
@@ -397,6 +451,8 @@ public class BillingForm extends JPanel {
                 String.format("%.2f", bill.getRoomCharges()),
                 String.format("%.2f", bill.getOtherCharges()),
                 String.format("%.2f", bill.getTotalAmount()),
+                bill.getPaymentMethod() != null ? bill.getPaymentMethod() : "Cash",
+                bill.getPaymentStatus() != null ? bill.getPaymentStatus() : "Paid",
                 sdf.format(bill.getBillDate())
             });
         }
@@ -405,6 +461,8 @@ public class BillingForm extends JPanel {
     private void clearForm() {
         cbPatient.setSelectedIndex(-1);
         cbDoctor.setSelectedIndex(-1);
+        cbPaymentMethod.setSelectedIndex(0);
+        cbPaymentStatus.setSelectedIndex(0);
         txtDoctorFee.setText("0.0");
         txtMedicineCharges.setText("0.0");
         txtRoomCharges.setText("0.0");

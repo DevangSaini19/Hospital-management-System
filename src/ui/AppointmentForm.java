@@ -15,12 +15,13 @@ import java.util.LinkedList;
 
 public class AppointmentForm extends JPanel {
 
-    private JComboBox<String> cbPatient, cbDoctor, cbDept, cbTime, cbStatus;
+    private JComboBox<String> cbPatient, cbDoctor, cbTime, cbStatus;
     private JTextField txtDate;
     private JTextArea txtReason;
     private AppointmentDAO appointmentDAO;
     private PatientDAO patientDAO;
     private JTable appointmentTable;
+    private ArrayList<String[]> doctors;
 
     public AppointmentForm(AppointmentDAO apptDAO, PatientDAO patDAO, MainDashboard dashboard) {
         this.appointmentDAO = apptDAO;
@@ -56,7 +57,7 @@ public class AppointmentForm extends JPanel {
         gbc.gridx = 0; gbc.gridy = 1;
         form.add(new JLabel("Select Doctor *"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 2;
-        ArrayList<String[]> doctors = appointmentDAO.getAllDoctors();
+        doctors = appointmentDAO.getAllDoctors();
         String[] doctorItems = doctors.stream()
             .map(d -> "[" + d[0] + "] " + d[1] + " — " + d[2])
             .toArray(String[]::new);
@@ -64,25 +65,19 @@ public class AppointmentForm extends JPanel {
         form.add(cbDoctor, gbc);
         gbc.gridwidth = 1;
 
-        // Department
-        gbc.gridx = 0; gbc.gridy = 2;
-        form.add(new JLabel("Department *"), gbc);
-        gbc.gridx = 1;
-        String[] depts = {"Cardiology","Neurology","Orthopaedics","Gynaecology",
-                           "General Medicine","Paediatrics","Urology","Gastroenterology",
-                           "ENT","Pulmonology","Oncology","Nephrology"};
-        cbDept = new JComboBox<>(depts);
-        form.add(cbDept, gbc);
-
-        // Date
-        gbc.gridx = 2;
+        // Date - using JSpinner with SpinnerDateModel
+        gbc.gridx = 2; gbc.gridy = 1;
         form.add(new JLabel("Appointment Date *"), gbc);
         gbc.gridx = 3;
-        txtDate = new JTextField(java.time.LocalDate.now().toString(), 12);
-        form.add(txtDate, gbc);
+        JSpinner dateSpinner = new JSpinner(new SpinnerDateModel());
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd");
+        dateSpinner.setEditor(dateEditor);
+        dateSpinner.setValue(new java.util.Date());
+        form.add(dateSpinner, gbc);
+        txtDate = new JTextField(); // Keep for reference but we'll get value from spinner
 
         // Time
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 0; gbc.gridy = 2;
         form.add(new JLabel("Time Slot *"), gbc);
         gbc.gridx = 1;
         String[] times = {"09:00","09:30","10:00","10:30","11:00","11:30",
@@ -91,7 +86,7 @@ public class AppointmentForm extends JPanel {
         form.add(cbTime, gbc);
 
         // Reason
-        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridx = 0; gbc.gridy = 3;
         form.add(new JLabel("Reason / Symptoms"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 3;
         txtReason = new JTextArea(3, 30);
@@ -100,13 +95,13 @@ public class AppointmentForm extends JPanel {
         gbc.gridwidth = 1;
 
         // Button
-        gbc.gridx = 1; gbc.gridy = 5; gbc.gridwidth = 2;
+        gbc.gridx = 1; gbc.gridy = 4; gbc.gridwidth = 2;
         JButton btnBook = new JButton("📅 Book Appointment");
         btnBook.setBackground(new Color(0, 102, 153));
         btnBook.setForeground(Color.WHITE);
         btnBook.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnBook.setFocusPainted(false);
-        btnBook.addActionListener(e -> bookAppointment(patients, doctors));
+        btnBook.addActionListener(e -> bookAppointment(patients, doctors, dateSpinner));
         form.add(btnBook, gbc);
 
         // Appointment list table
@@ -117,16 +112,19 @@ public class AppointmentForm extends JPanel {
         add(split, BorderLayout.CENTER);
     }
 
-    private void bookAppointment(LinkedList<Patient> patients, ArrayList<String[]> doctors) {
+    private void bookAppointment(LinkedList<Patient> patients, ArrayList<String[]> doctors, JSpinner dateSpinner) {
         try {
             int patIdx = cbPatient.getSelectedIndex();
             int docIdx = cbDoctor.getSelectedIndex();
 
             int patientId = patients.get(patIdx).getPatientId();
             int doctorId = Integer.parseInt(doctors.get(docIdx)[0]);
-            Date date = Date.valueOf(txtDate.getText().trim());
+            // Get date from spinner and convert to java.sql.Date
+            java.util.Date selectedDate = (java.util.Date) dateSpinner.getValue();
+            Date date = new Date(selectedDate.getTime());
             Time time = Time.valueOf(cbTime.getSelectedItem() + ":00");
-            String dept = (String) cbDept.getSelectedItem();
+            // Get department from the selected doctor's specialization
+            String dept = doctors.get(docIdx)[2];
             String reason = txtReason.getText().trim();
 
             Appointment appt = new Appointment(patientId, doctorId, date, time, dept, reason);

@@ -21,7 +21,7 @@ import java.util.LinkedList;
  */
 public class AppointmentFormWithEvents extends JPanel {
 
-    private JComboBox<String> cbPatient, cbDoctor, cbDept, cbTime;
+    private JComboBox<String> cbPatient, cbDoctor, cbTime;
     private JTextField txtDate;
     private JTextArea txtReason;
     private JButton btnBook, btnClear;
@@ -29,6 +29,7 @@ public class AppointmentFormWithEvents extends JPanel {
     private AppointmentDAO appointmentDAO;
     private PatientDAO patientDAO;
     private MainDashboard dashboard;
+    private ArrayList<String[]> doctors;
 
     public AppointmentFormWithEvents(AppointmentDAO apptDAO, PatientDAO patDAO, MainDashboard dashboard) {
         this.appointmentDAO = apptDAO;
@@ -65,7 +66,7 @@ public class AppointmentFormWithEvents extends JPanel {
         gbc.gridx = 0; gbc.gridy = 1;
         form.add(new JLabel("Select Doctor *"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 2;
-        ArrayList<String[]> doctors = appointmentDAO.getAllDoctors();
+        doctors = appointmentDAO.getAllDoctors();
         String[] doctorItems = doctors.stream()
             .map(d -> "[" + d[0] + "] " + d[1] + " — " + d[2])
             .toArray(String[]::new);
@@ -73,25 +74,15 @@ public class AppointmentFormWithEvents extends JPanel {
         form.add(cbDoctor, gbc);
         gbc.gridwidth = 1;
 
-        // Department
-        gbc.gridx = 0; gbc.gridy = 2;
-        form.add(new JLabel("Department *"), gbc);
-        gbc.gridx = 1;
-        String[] depts = {"Cardiology","Neurology","Orthopaedics","Gynaecology",
-                           "General Medicine","Paediatrics","Urology","Gastroenterology",
-                           "ENT","Pulmonology","Oncology","Nephrology"};
-        cbDept = new JComboBox<>(depts);
-        form.add(cbDept, gbc);
-
         // Date
-        gbc.gridx = 2;
+        gbc.gridx = 2; gbc.gridy = 1;
         form.add(new JLabel("Appointment Date *"), gbc);
         gbc.gridx = 3;
         txtDate = new JTextField(LocalDate.now().toString(), 12);
         form.add(txtDate, gbc);
 
         // Time Slot
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 0; gbc.gridy = 2;
         form.add(new JLabel("Time Slot *"), gbc);
         gbc.gridx = 1;
         String[] times = {"09:00","09:30","10:00","10:30","11:00","11:30",
@@ -100,7 +91,7 @@ public class AppointmentFormWithEvents extends JPanel {
         form.add(cbTime, gbc);
 
         // Reason for appointment
-        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridx = 0; gbc.gridy = 3;
         form.add(new JLabel("Reason / Symptoms"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 3;
         txtReason = new JTextArea(3, 30);
@@ -109,7 +100,7 @@ public class AppointmentFormWithEvents extends JPanel {
         gbc.gridwidth = 1;
 
         // Buttons
-        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
         btnBook = new JButton("✓ Book Appointment");
         btnBook.setBackground(new Color(33, 150, 243));
         btnBook.setForeground(Color.WHITE);
@@ -126,7 +117,7 @@ public class AppointmentFormWithEvents extends JPanel {
         form.add(btnClear, gbc);
 
         // Message Label
-        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 4;
+        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 4;
         lblMessage = new JLabel("");
         lblMessage.setFont(new Font("Arial", Font.PLAIN, 12));
         form.add(lblMessage, gbc);
@@ -183,8 +174,15 @@ public class AppointmentFormWithEvents extends JPanel {
             }
             int doctorId = Integer.parseInt(doctorStr.split("\\[")[1].split("\\]")[0]);
 
-            // Get other values
-            String department = (String) cbDept.getSelectedItem();
+            // Get department from the selected doctor's specialization
+            String department = "";
+            for (String[] doctor : doctors) {
+                if (Integer.parseInt(doctor[0]) == doctorId) {
+                    department = doctor[2]; // Index 2 contains the specialization
+                    break;
+                }
+            }
+            
             String dateStr = txtDate.getText().trim();
             String timeStr = (String) cbTime.getSelectedItem();
             String reason = txtReason.getText().trim();
@@ -246,7 +244,6 @@ public class AppointmentFormWithEvents extends JPanel {
     private void clearFormFields() {
         if (cbPatient.getItemCount() > 0) cbPatient.setSelectedIndex(0);
         if (cbDoctor.getItemCount() > 0) cbDoctor.setSelectedIndex(0);
-        if (cbDept.getItemCount() > 0) cbDept.setSelectedIndex(0);
         if (cbTime.getItemCount() > 0) cbTime.setSelectedIndex(0);
         txtDate.setText(LocalDate.now().toString());
         txtReason.setText("");

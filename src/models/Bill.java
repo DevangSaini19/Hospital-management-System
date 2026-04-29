@@ -16,6 +16,8 @@ public class Bill {
     private double otherCharges;
     private double totalAmount;
     private Timestamp billDate;
+    private String paymentMethod;
+    private String paymentStatus;
 
     // Constructor for new bill
     public Bill(int patientId, int doctorId, double doctorFee,
@@ -142,6 +144,22 @@ public class Bill {
 
     public void setBillDate(Timestamp billDate) {
         this.billDate = billDate;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     /**

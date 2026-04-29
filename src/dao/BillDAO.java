@@ -88,7 +88,7 @@ public class BillDAO {
                      "FROM bills b " +
                      "JOIN patients p ON b.patient_id = p.patient_id " +
                      "JOIN doctors d ON b.doctor_id = d.doctor_id " +
-                     "ORDER BY b.bill_date DESC";
+                     "ORDER BY b.bill_id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
